@@ -942,6 +942,7 @@
       <p>The Symbol type is the set of all non-String values that may be used as the key of an Object property (<emu-xref href="#sec-object-type"></emu-xref>).</p>
       <p>Each possible Symbol value is unique and immutable.</p>
       <p>Each Symbol value immutably holds an associated value called [[Description]] that is either *undefined* or a String value.</p>
+      <p>Each Symbol value immutably holds an associated value called [[Private]] that is either *true* or *false*</p>
 
       <emu-clause id="sec-well-known-symbols">
         <h1>Well-Known Symbols</h1>
@@ -4385,6 +4386,15 @@
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-isprivatesymbol" aoid="IsPrivateSymbol">
+      <h1>IsPrivateSymbol ( _argument_ )</h1>
+      <p>The abstract operation IsPrivateSymbol determines if _argument_ is a Symbol value whose [[Description]] is *true*.</p>
+      <emu-alg>
+        1. If Type(_argument_) is not Symbol, return *false*.
+        1. Return _argument_.[[Private]].
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-ispropertykey" aoid="IsPropertyKey">
       <h1>IsPropertyKey ( _argument_ )</h1>
       <p>The abstract operation IsPropertyKey determines if _argument_, which must be an ECMAScript language value, is a value that may be used as a property key.</p>
@@ -4593,7 +4603,9 @@
       <emu-alg>
         1. Assert: Type(_O_) is Object.
         1. Assert: IsPropertyKey(_P_) is *true*.
-        1. Let _newDesc_ be the PropertyDescriptor { [[Value]]: _V_, [[Writable]]: *true*, [[Enumerable]]: *true*, [[Configurable]]: *true* }.
+        1. If IsPrivateSymbol(_P_) is *true*, let _enumerable_ be *false*.
+        1. Otherwise, let _enumerable_ be *true*.
+        1. Let _newDesc_ be the PropertyDescriptor { [[Value]]: _V_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
         1. Return ? _O_.[[DefineOwnProperty]](_P_, _newDesc_).
       </emu-alg>
       <emu-note>
@@ -6991,6 +7003,7 @@
         </emu-note>
         <emu-alg>
           1. Assert: If _O_ is not *undefined*, then IsPropertyKey(_P_) is *true*.
+          1. If _Desc_.[[Enumerable]] is *true* and IsPrivateSymbol(_P_), return *false*.
           1. If _current_ is *undefined*, then
             1. If _extensible_ is *false*, return *false*.
             1. Assert: _extensible_ is *true*.
@@ -7109,7 +7122,9 @@
             1. If _parent_ is not *null*, then
               1. Return ? _parent_.[[Set]](_P_, _V_, _Receiver_).
             1. Else,
-              1. Set _ownDesc_ to the PropertyDescriptor { [[Value]]: *undefined*, [[Writable]]: *true*, [[Enumerable]]: *true*, [[Configurable]]: *true* }.
+              1. If IsPrivateSymbol(_P_) is *true*, let _enumerable_ be *false*.
+              1. Otherwise, let _enumerable_ be *true*.
+              1. Set _ownDesc_ to the PropertyDescriptor { [[Value]]: *undefined*, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
           1. If IsDataDescriptor(_ownDesc_) is *true*, then
             1. If _ownDesc_.[[Writable]] is *false*, return *false*.
             1. If Type(_Receiver_) is not Object, return *false*.
@@ -7171,7 +7186,7 @@
           1. For each own property key _P_ of _O_ that is a String but is not an array index, in ascending chronological order of property creation, do
             1. Add _P_ as the last element of _keys_.
           1. For each own property key _P_ of _O_ that is a Symbol, in ascending chronological order of property creation, do
-            1. Add _P_ as the last element of _keys_.
+            1. If _P_.[[Private]] is *false*, add _P_ as the last element of _keys_.
           1. Return _keys_.
         </emu-alg>
       </emu-clause>
@@ -9008,6 +9023,8 @@
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
         1. Assert: Type(_handler_) is Object.
+        1. If IsPrivateSymbol(_P_) is *true* and _O_.[[ProxyAllowedPrivates]] does not contain _P_,
+          1. Return ? _target_.[[GetOwnProperty]](_P_).
         1. Let _target_ be _O_.[[ProxyTarget]].
         1. Let _trap_ be ? GetMethod(_handler_, `"getOwnPropertyDescriptor"`).
         1. If _trap_ is *undefined*, then
@@ -9061,6 +9078,8 @@
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
         1. Assert: Type(_handler_) is Object.
+        1. If IsPrivateSymbol(_P_) is *true* and _O_.[[ProxyAllowedPrivates]] does not contain _P_,
+          1. Return ? _target_.[[DefineOwnProperty]](_P_, _Desc_).
         1. Let _target_ be _O_.[[ProxyTarget]].
         1. Let _trap_ be ? GetMethod(_handler_, `"defineProperty"`).
         1. If _trap_ is *undefined*, then
@@ -9108,6 +9127,8 @@
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
         1. Assert: Type(_handler_) is Object.
+        1. If IsPrivateSymbol(_P_) is *true* and _O_.[[ProxyAllowedPrivates]] does not contain _P_,
+          1. Return ? _target_.[[HasProperty]](_P_).
         1. Let _target_ be _O_.[[ProxyTarget]].
         1. Let _trap_ be ? GetMethod(_handler_, `"has"`).
         1. If _trap_ is *undefined*, then
@@ -9145,6 +9166,8 @@
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
         1. Assert: Type(_handler_) is Object.
+        1. If IsPrivateSymbol(_P_) is *true* and _O_.[[ProxyAllowedPrivates]] does not contain _P_,
+          1. Return ? _target_.[[Get]](_P_, _Receiver_).
         1. Let _target_ be _O_.[[ProxyTarget]].
         1. Let _trap_ be ? GetMethod(_handler_, `"get"`).
         1. If _trap_ is *undefined*, then
@@ -9179,6 +9202,8 @@
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
         1. Assert: Type(_handler_) is Object.
+        1. If IsPrivateSymbol(_P_) is *true* and _O_.[[ProxyAllowedPrivates]] does not contain _P_,
+          1. Return ? _target_.[[Set]](_P_, _V_, _Receiver_).
         1. Let _target_ be _O_.[[ProxyTarget]].
         1. Let _trap_ be ? GetMethod(_handler_, `"set"`).
         1. If _trap_ is *undefined*, then
@@ -9217,6 +9242,8 @@
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
         1. Assert: Type(_handler_) is Object.
+        1. If IsPrivateSymbol(_P_) is *true* and _O_.[[ProxyAllowedPrivates]] does not contain _P_,
+          1. Return ? _target_.[[Delete]](_P_).
         1. Let _target_ be _O_.[[ProxyTarget]].
         1. Let _trap_ be ? GetMethod(_handler_, `"deleteProperty"`).
         1. If _trap_ is *undefined*, then
@@ -9352,14 +9379,17 @@
     </emu-clause>
 
     <emu-clause id="sec-proxycreate" aoid="ProxyCreate">
-      <h1>ProxyCreate ( _target_, _handler_ )</h1>
+      <h1>ProxyCreate ( _target_, _handler_, _options_ )</h1>
       <p>The abstract operation ProxyCreate with arguments _target_ and _handler_ is used to specify the creation of new Proxy exotic objects. It performs the following steps:</p>
       <emu-alg>
         1. If Type(_target_) is not Object, throw a *TypeError* exception.
         1. If _target_ is a Proxy exotic object and _target_.[[ProxyHandler]] is *null*, throw a *TypeError* exception.
         1. If Type(_handler_) is not Object, throw a *TypeError* exception.
         1. If _handler_ is a Proxy exotic object and _handler_.[[ProxyHandler]] is *null*, throw a *TypeError* exception.
-        1. Let _P_ be a newly created Proxy exotic object with internal slots [[ProxyTarget]] and [[ProxyHandler]].
+        1. Let _allowedPrivates_ be ? Get(_options_, *"allowedPrivateSymbols"*).
+        1. If _allowedPrivates_ is not *undefined*, set _allowedPrivates_ to ? CreateListFromArrayLike(_allowedPrivates_, &laquo; Symbol &raquo;).
+        1. If _options_ is not *undefined* and Type(_options_) is not Object, throw a *TypeError* exception.
+        1. Let _P_ be a newly created Proxy exotic object with internal slots [[ProxyTarget]], [[ProxyHandler]], and [[ProxyAllowedPrivates]].
         1. Set _P_'s essential internal methods (except for [[Call]] and [[Construct]]) to the definitions specified in <emu-xref href="#sec-proxy-object-internal-methods-and-internal-slots"></emu-xref>.
         1. If IsCallable(_target_) is *true*, then
           1. Set _P_.[[Call]] as specified in <emu-xref href="#sec-proxy-object-internal-methods-and-internal-slots-call-thisargument-argumentslist"></emu-xref>.
@@ -9367,6 +9397,7 @@
             1. Set _P_.[[Construct]] as specified in <emu-xref href="#sec-proxy-object-internal-methods-and-internal-slots-construct-argumentslist-newtarget"></emu-xref>.
         1. Set _P_.[[ProxyTarget]] to _target_.
         1. Set _P_.[[ProxyHandler]] to _handler_.
+        1. Set _P_.[[ProxyAllowedPrivates]] to _allowedPrivates_.
         1. Return _P_.
       </emu-alg>
     </emu-clause>
@@ -25204,9 +25235,17 @@
         <p>When `Symbol` is called with optional argument _description_, the following steps are taken:</p>
         <emu-alg>
           1. If NewTarget is not *undefined*, throw a *TypeError* exception.
+          1. Return ! SymbolCreate(_description_, *false*).
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-createsymbol" aoid="SymbolCreate">
+        <h1>SymbolCreate ( _description_, _private_ ) </h1>
+        <p>When the abstract operation SymbolCreate is called with arguments _description_ and _private_, the following steps are taken:</p>
+        <emu-alg>
           1. If _description_ is *undefined*, let _descString_ be *undefined*.
           1. Else, let _descString_ be ? ToString(_description_).
-          1. Return a new unique Symbol value whose [[Description]] value is _descString_.
+          1. Return a new unique Symbol value whose [[Description]] value is _descString_ and whose [[Private]] value is _private_.
         </emu-alg>
       </emu-clause>
     </emu-clause>
@@ -25319,6 +25358,14 @@
         <h1>Symbol.matchAll</h1>
         <p>The initial value of *Symbol.matchAll* is the well-known symbol @@matchAll (<emu-xref href="#table-2"></emu-xref>).</p>
         <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *false* }.</p>
+      </emu-clause>
+
+      <emu-clause id="sec-symbol.private">
+        <h1>Symbol.private ( [ _description_ ] )</h1>
+        <p>When `Symbol.private` is called with optional argument _description_ it performs the following steps:</p>
+        <emu-alg>
+          1. Return ! SymbolCreate(_description_, *true*).
+        </emu-alg>
       </emu-clause>
 
       <emu-clause id="sec-symbol.prototype">
@@ -39027,11 +39074,11 @@ THH:mm:ss.sss
       </ul>
 
       <emu-clause id="sec-proxy-target-handler">
-        <h1>Proxy ( _target_, _handler_ )</h1>
-        <p>When `Proxy` is called with arguments _target_ and _handler_, it performs the following steps:</p>
+        <h1>Proxy ( _target_, _handler_  [ , _options_ ])</h1>
+        <p>When `Proxy` is called with arguments _target_, _handler_, and optional argument _options_, it performs the following steps:</p>
         <emu-alg>
           1. If NewTarget is *undefined*, throw a *TypeError* exception.
-          1. Return ? ProxyCreate(_target_, _handler_).
+          1. Return ? ProxyCreate(_target_, _handler_, _options_).
         </emu-alg>
       </emu-clause>
     </emu-clause>
@@ -39046,10 +39093,10 @@ THH:mm:ss.sss
       </ul>
 
       <emu-clause id="sec-proxy.revocable">
-        <h1>Proxy.revocable ( _target_, _handler_ )</h1>
-        <p>The `Proxy.revocable` function is used to create a revocable Proxy object. When `Proxy.revocable` is called with arguments _target_ and _handler_, the following steps are taken:</p>
+        <h1>Proxy.revocable ( _target_, _handler_ [ , _options_ ] )</h1>
+        <p>The `Proxy.revocable` function is used to create a revocable Proxy object. When `Proxy.revocable` is called with arguments _target_, _handler_, and optional argument _options_, the following steps are taken:</p>
         <emu-alg>
-          1. Let _p_ be ? ProxyCreate(_target_, _handler_).
+          1. Let _p_ be ? ProxyCreate(_target_, _handler_, _options_).
           1. Let _steps_ be the algorithm steps defined in <emu-xref href="#sec-proxy-revocation-functions" title></emu-xref>.
           1. Let _revoker_ be ! CreateBuiltinFunction(_steps_, &laquo; [[RevocableProxy]] &raquo;).
           1. Set _revoker_.[[RevocableProxy]] to _p_.
@@ -39072,6 +39119,7 @@ THH:mm:ss.sss
             1. Assert: _p_ is a Proxy object.
             1. Set _p_.[[ProxyTarget]] to *null*.
             1. Set _p_.[[ProxyHandler]] to *null*.
+            1. Set _p_.[[ProxyAllowedPrivates]] to *null*.
             1. Return *undefined*.
           </emu-alg>
           <p>The `"length"` property of a Proxy revocation function is 0.</p>
