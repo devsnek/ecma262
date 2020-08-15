@@ -28820,6 +28820,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be LocalTime(? thisTimeValue(*this* value)).
           1. Let _dt_ be ? ToNumber(_date_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. Let _newDate_ be MakeDate(MakeDay(YearFromTime(_t_), MonthFromTime(_t_), _dt_), TimeWithinDay(_t_)).
           1. Let _u_ be TimeClip(UTC(_newDate_)).
           1. Set the [[DateValue]] internal slot of this Date object to _u_.
@@ -28853,6 +28854,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be LocalTime(? thisTimeValue(*this* value)).
           1. Let _h_ be ? ToNumber(_hour_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _min_ is not present, let _m_ be MinFromTime(_t_); otherwise, let _m_ be ? ToNumber(_min_).
           1. If _sec_ is not present, let _s_ be SecFromTime(_t_); otherwise, let _s_ be ? ToNumber(_sec_).
           1. If _ms_ is not present, let _milli_ be msFromTime(_t_); otherwise, let _milli_ be ? ToNumber(_ms_).
@@ -28873,6 +28875,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be LocalTime(? thisTimeValue(*this* value)).
           1. Set _ms_ to ? ToNumber(_ms_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. Let _time_ be MakeTime(HourFromTime(_t_), MinFromTime(_t_), SecFromTime(_t_), _ms_).
           1. Let _u_ be TimeClip(UTC(MakeDate(Day(_t_), _time_))).
           1. Set the [[DateValue]] internal slot of this Date object to _u_.
@@ -28886,6 +28889,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be LocalTime(? thisTimeValue(*this* value)).
           1. Let _m_ be ? ToNumber(_min_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _sec_ is not present, let _s_ be SecFromTime(_t_); otherwise, let _s_ be ? ToNumber(_sec_).
           1. If _ms_ is not present, let _milli_ be msFromTime(_t_); otherwise, let _milli_ be ? ToNumber(_ms_).
           1. Let _date_ be MakeDate(Day(_t_), MakeTime(HourFromTime(_t_), _m_, _s_, _milli_)).
@@ -28905,6 +28909,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be LocalTime(? thisTimeValue(*this* value)).
           1. Let _m_ be ? ToNumber(_month_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _date_ is not present, let _dt_ be DateFromTime(_t_); otherwise, let _dt_ be ? ToNumber(_date_).
           1. Let _newDate_ be MakeDate(MakeDay(YearFromTime(_t_), _m_, _dt_), TimeWithinDay(_t_)).
           1. Let _u_ be TimeClip(UTC(_newDate_)).
@@ -28923,6 +28928,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be LocalTime(? thisTimeValue(*this* value)).
           1. Let _s_ be ? ToNumber(_sec_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _ms_ is not present, let _milli_ be msFromTime(_t_); otherwise, let _milli_ be ? ToNumber(_ms_).
           1. Let _date_ be MakeDate(Day(_t_), MakeTime(HourFromTime(_t_), MinFromTime(_t_), _s_, _milli_)).
           1. Let _u_ be TimeClip(UTC(_date_)).
@@ -28953,6 +28959,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be ? thisTimeValue(*this* value).
           1. Let _dt_ be ? ToNumber(_date_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. Let _newDate_ be MakeDate(MakeDay(YearFromTime(_t_), MonthFromTime(_t_), _dt_), TimeWithinDay(_t_)).
           1. Let _v_ be TimeClip(_newDate_).
           1. Set the [[DateValue]] internal slot of this Date object to _v_.
@@ -28986,6 +28993,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be ? thisTimeValue(*this* value).
           1. Let _h_ be ? ToNumber(_hour_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _min_ is not present, let _m_ be MinFromTime(_t_); otherwise, let _m_ be ? ToNumber(_min_).
           1. If _sec_ is not present, let _s_ be SecFromTime(_t_); otherwise, let _s_ be ? ToNumber(_sec_).
           1. If _ms_ is not present, let _milli_ be msFromTime(_t_); otherwise, let _milli_ be ? ToNumber(_ms_).
@@ -29006,6 +29014,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be ? thisTimeValue(*this* value).
           1. Let _milli_ be ? ToNumber(_ms_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. Let _time_ be MakeTime(HourFromTime(_t_), MinFromTime(_t_), SecFromTime(_t_), _milli_).
           1. Let _v_ be TimeClip(MakeDate(Day(_t_), _time_)).
           1. Set the [[DateValue]] internal slot of this Date object to _v_.
@@ -29019,6 +29028,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be ? thisTimeValue(*this* value).
           1. Let _m_ be ? ToNumber(_min_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _sec_ is not present, let _s_ be SecFromTime(_t_).
           1. Else,
             1. Let _s_ be ? ToNumber(_sec_).
@@ -29042,6 +29052,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be ? thisTimeValue(*this* value).
           1. Let _m_ be ? ToNumber(_month_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _date_ is not present, let _dt_ be DateFromTime(_t_).
           1. Else,
             1. Let _dt_ be ? ToNumber(_date_).
@@ -29062,6 +29073,7 @@ THH:mm:ss.sss
         <emu-alg>
           1. Let _t_ be ? thisTimeValue(*this* value).
           1. Let _s_ be ? ToNumber(_sec_).
+          1. If _t_ is *NaN*, return *NaN*.
           1. If _ms_ is not present, let _milli_ be msFromTime(_t_).
           1. Else,
             1. Let _milli_ be ? ToNumber(_ms_).
